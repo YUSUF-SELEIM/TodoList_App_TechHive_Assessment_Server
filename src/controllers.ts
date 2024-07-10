@@ -25,12 +25,20 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+        where: {
+            email: email.toLowerCase(),
+        },
+    });
     if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(400).json({ error: 'Invalid email or password' });
     }
-    const token = jwt.sign({ userId: user.id }, SECRET);
+    const token = jwt.sign({ userId: user.id }, SECRET, { expiresIn: '1h' });
     res.json({ token });
 };
 
+export const getTodos = async (req: Request, res: Response) => {
+    const todos = await prisma.todo.findMany();
+    res.json(todos);
+};
 
