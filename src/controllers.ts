@@ -63,7 +63,7 @@ export const addTodo = async (req: Request, res: Response) => {
 
         const todo = await prisma.todo.create({
             data: {
-                id: randomUUID(), 
+                id: randomUUID(),
                 content,
                 userId,
             },
@@ -75,24 +75,26 @@ export const addTodo = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'An error occurred while adding todo' });
     }
 }
+export const handleToggleCompleteTodo = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { completed } = req.body;
 
-export const markAsCompleted = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
-        console.log(id);
-
-        const todo = await prisma.todo.update({
-            where: {
-                id,
-            },
-            data: {
-                completed: true,
-            },
+        const todo = await prisma.todo.findUnique({
+            where: { id: id },
         });
 
-        res.json(todo);
+        if (!todo) {
+            return res.status(404).json({ message: 'Todo not found' });
+        }
+        const updatedTodo = await prisma.todo.update({
+            where: { id: id },
+            data: { completed: completed },
+        });
+
+        res.json(updatedTodo);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred while marking todo as completed' });
+        res.status(500).json({ message: 'Server error' });
     }
-}
+};
