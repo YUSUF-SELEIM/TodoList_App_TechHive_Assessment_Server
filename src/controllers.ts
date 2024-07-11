@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -38,7 +39,60 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const getTodos = async (req: Request, res: Response) => {
-    const todos = await prisma.todo.findMany();
-    res.json(todos);
+    try {
+        // Assuming req.user is added by an authentication middleware and contains userId
+        const userId = (req.user as { userId: string }).userId;
+
+        const todos = await prisma.todo.findMany({
+            where: {
+                userId: userId,
+            },
+        });
+
+        res.json(todos);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching todos' });
+    }
 };
 
+export const addTodo = async (req: Request, res: Response) => {
+    try {
+        const { content } = req.body;
+        const userId = (req.user as { userId: string }).userId;
+
+        const todo = await prisma.todo.create({
+            data: {
+                id: randomUUID(), 
+                content,
+                userId,
+            },
+        });
+
+        res.json(todo);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while adding todo' });
+    }
+}
+
+export const markAsCompleted = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        console.log(id);
+
+        const todo = await prisma.todo.update({
+            where: {
+                id,
+            },
+            data: {
+                completed: true,
+            },
+        });
+
+        res.json(todo);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while marking todo as completed' });
+    }
+}
