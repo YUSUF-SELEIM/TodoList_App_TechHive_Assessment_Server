@@ -6,7 +6,7 @@ import cors from 'cors';
 const app = express();
 app.use(cors(
   {
-    origin: ['http://192.168.1.7:8081','http://localhost:8081'],
+    origin: ['http://192.168.1.2:8081','http://localhost:8081'],
     credentials: true
   }
 ));
