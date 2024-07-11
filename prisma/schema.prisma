@@ -22,7 +22,6 @@ model User {
 
 model Todo {
   id        String     @id @map("_id")
-  title     String
   content   String
   completed Boolean @default(false)
   userId    String
