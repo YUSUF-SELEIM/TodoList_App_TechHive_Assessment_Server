@@ -98,3 +98,40 @@ export const handleToggleCompleteTodo = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+export const updateATodo = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { content } = req.body;
+
+        const todo = await prisma.todo.update({
+            where: {
+                id,
+            },
+            data: {
+                content,
+            },
+        });
+
+        res.json(todo);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while updating todo' });
+    }
+}
+
+export const deleteTodo = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const todo = await prisma.todo.delete({
+            where: {
+                id,
+            },
+        });
+
+        res.json(todo);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while deleting todo' });
+    }
+}
